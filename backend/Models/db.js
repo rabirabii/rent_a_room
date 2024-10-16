@@ -13,6 +13,8 @@ async function initializeDatabase() {
     await DatabaseConnection.sync({ force: false });
     console.log(`Tables synchronized with database: ${process.env.DB_NAME}`);
 
+    // Uncomment Untuk menambahkan data dummy secara otomatis setelah database terhubung
+
     // if (process.env.NODE_ENV !== "production") {
     //   await insertTestData();
     // }

@@ -6,6 +6,7 @@ const multer = require("multer");
 const { User, Room, Booking, Payment } = require("./Models/Relations");
 const { initializeDatabase } = require("./Models/db");
 const uploadAvatar = require("./Utils/multer");
+const createDatabase = require("./Models/createDatabase");
 require("./Models/Relations");
 if (process.env.NODE_ENV !== "production") {
   require("dotenv").config({
@@ -22,6 +23,8 @@ app.use(express.json());
 app.use("/images", express.static(path.join(__dirname, "images")));
 const PORT = process.env.PORT;
 async function startApp() {
+  // // Sebelum program di run Uncomment function createDatabase untuk membuat database
+  // await createDatabase();
   await initializeDatabase();
 
   // Routes
