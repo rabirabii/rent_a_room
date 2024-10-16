@@ -6,8 +6,10 @@ import { Checkbox } from "../../components/ui/checkbox";
 import { Link } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
-import { clearError, setCredentials } from "../../Redux/Slicer/Auth";
+import { clearError, setCredentials } from "../../Redux/Slicer/Auth"; // Import setCredentials
 import { LoginUser, RegisterUser } from "../../Redux/Reducer/auth";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Auth = ({ isLogin = true }) => {
   const [email, setEmail] = useState("");
@@ -19,35 +21,60 @@ const Auth = ({ isLogin = true }) => {
   const navigate = useNavigate();
   const { error, token } = useSelector((state) => state.auth);
 
-  // Redirect if logged in
-  // useEffect(() => {
-  //   if (token) {
-  //     navigate("/");
-  //   }
-  // }, [token, navigate]);
-
   useEffect(() => {
     dispatch(clearError());
   }, [isLogin, dispatch]);
 
-  // Handle login/register form submission
+  const handleLogin = async (email, password) => {
+    const responseData = await LoginUser({ email, password });
+    if (responseData.token && responseData.user) {
+      dispatch(
+        setCredentials({
+          token: responseData.token,
+          user: responseData.user,
+        })
+      );
+      toast.success("Login successful!");
+      navigate("/");
+    }
+  };
+
+  const handleRegister = async (name, email, password) => {
+    try {
+      const responseData = await RegisterUser({ name, email, password });
+      if (responseData) {
+        toast.success("Registration successful! Please login.");
+
+        setEmail("");
+        setPassword("");
+        setName("");
+
+        navigate("/login");
+      }
+    } catch (error) {
+      toast.error(error.message || "Registration failed");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      let responseData;
       if (isLogin) {
-        responseData = await LoginUser({ email, password });
+        await handleLogin(email, password);
       } else {
-        responseData = await RegisterUser({ name, email, password });
-      }
+        await handleRegister(name, email, password);
 
-      dispatch(
-        setCredentials({ token: responseData.token, user: responseData.user })
-      );
-      navigate("/");
+        setEmail("");
+        setPassword("");
+        setName("");
+        toast.success("Registration successful! Please login.");
+
+        navigate("/login");
+      }
     } catch (error) {
+      toast.error(error.message || "An error occurred");
       dispatch(clearError());
     } finally {
       setLoading(false);
